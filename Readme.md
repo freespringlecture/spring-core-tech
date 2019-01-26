@@ -51,7 +51,8 @@ public class Single {
 ```
 
 ## 프록시 
-​https://en.wikipedia.org/wiki/Proxy_pattern​
+https://en.wikipedia.org/wiki/Proxy_pattern
+  
 <img src="img/02-05.png" style="width:450px;"/>
 
 ## 싱글톤 객체 사용시 주의할 점
