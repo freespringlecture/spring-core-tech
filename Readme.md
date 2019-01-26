@@ -1,193 +1,53 @@
-# IoC 컨테이너 2부: ApplicationContext와 다양한 빈 설정 방법
-> 빈 설정 -> 스프링 IoC 컨테이너
-
-## 고전적인 Application 설정
-```xml
-<?xml version="1.0" encoding="utf-8" ?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/mvc
-       http://www.springframework.org/schema/mvc/spring-mvc.xsd
-       http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd" >
-
-    <bean id="bookService" class="me.freelife.BookService"> <!-- bookService 빈 등록 -->
-        <!-- bookRepository 프로퍼티에 bookRepository 빈을 레퍼런스로 주입  -->
-        <!-- bookRepository name은 setter에서 가지고 온 것 -->
-        <!-- ref는 레퍼런스로 다른 빈을 참조한다는 뜻 -->
-        <!-- ref에는 setter 에 들어갈 수 있는 다른 bean의 id가 와야됨 -->
-        <property name="bookRepository" ref="bookRepository"/>
-    </bean>
-
-    <bean id="bookRepository" class="me.freelife.BookRepository"/> <!-- bookRepository 빈 등록 -->
-
-</beans>
-```
-
-- BookRepository
+## IoC 컨테이너 3부: @Autowired
+### required
+> @Autowired 를 처리 하다가 해당하는 빈의 타입을 못찾거나 의존성 주입을 할수 없는 경우 에러가 나고 애플리케이션 구동이 불가능함
+> 아래와 같이 설정하면 의존성 주입을 할 수없는 경우 패스함
 ```java
-public class BookRepository {
-}
+@Autowired(required = false)
 ```
+> 생성자를 사용한 의존성 주입에는 사용할 수 없음
+> 생성자를 사용한 의존성 주입은 빈을 만들때에도 개입이 됨 
+> 생성자에 전달받아야 되는 타입의 빈이 없으면 인스턴스를 만들지 못하고 서비스도 등록이 되지 않음
 
-- BookService
+#### 사용할 수 있는 위치
+  - 생성자 (스프링 4.3 부터는 생략 가능)
+  - 세터
+  - 필드
+
+#### 경우의 수
+  - 해당 타입의 빈이 없는 경우
+  - 해당 타입의 빈이 한 개인 경우
+  - 해당 타입의 빈이 여러 개인 경우
+    - 빈 이름으로 시도
+      - 같은 이름의 빈 찾으면 해당 빈 사용
+      - 같은 이름 못 찾으면 실패
+
+#### 같은 타입의 빈이 여러개 일 때
+  - @Primary - 
+  - 해당 타입의 빈 모두 주입받기 - List<Repository> bookRepositories;
+  - @Qualifier(빈 이름으로 주입)
+  - 그외 위의 어노테이션을 사용하지 않고 필드이름과 동일하게 지정해서 의존성을 주입하면 그이름과 동일한 레파지토리를 자동으로 주입받음
 ```java
-public class BookService {
-
-    BookRepository bookRepository;
-
-    public void setBookRepository(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
-    }
-}
+@Autowired
+BookRepository myBookRepository;
 ```
 
-- application
-```java
-public class Application {
+#### 동작 원리
+> BeanFactory 가 자신에게 등록된 BeanPostProcessor 들을 찾아서 일반적인 Bean들에게 로직을 적용함
+> AutowiredAnnotationBeanPostProcessor 가 기본적으로 Bean으로 등록되어있음
+> BeanPostProcessor 의 라이프사이클 구현체에 의해 동작함
+> @Autowired 는 postProcessBeforeInitialization 단계
+> ApplicationRunner 의 경우 애플리케이션 구동이 다 끝나고 동작함
+> Runner을 사용하지 않으면 애플리케이션 구동 중에 처리됨
 
-    public static void main(String[] args) {
-        ApplicationContext context = new ClassPathXmlApplicationContext("application.xml");
-        String[] beanDefinitionNames = context.getBeanDefinitionNames();
-        System.out.println(Arrays.toString(beanDefinitionNames));
-        BookService bookService = (BookService) context.getBean("bookService");
-        System.out.println(bookService.bookRepository != null);
-    }
+- BeanPostProcessor
+  - 아래의 세가지 라이프사이클 단계가 있다
+    - postProcessBeforeInitialization
+    - InitializingBean's afterPropertiesSet
+    - postProcessAfterInitialization
+> Bean을 Initializer(만들다)하여 인스턴스를 만든 다음에
+> Bean의 초기화 라이프사이클(Initialization LifeCycle) 이전 OR 이후에 부가적인 작업을 할 수 있는 또다른 라이프사이클 콜백
 
-}
-```
-
-### 일일히 빈으로 등록하는 단점을 보완하기 위한 방법
-> 단점을 보완하기위해 패키지를 스캔해서 @Component @Service @Repository 처럼 
-> @Component를 확장한 애노테이션들을 스캐닝해서 빈으로 자동으로 등록해줌
-> 이렇게 등록된 빈은 @Autowired 나 @Inject를 통해 의존성을 주입하여 사용
-> 애너테이션 기반에 빈을 등록하고 설정하는 기능은 스프링 2.5부터 가능한기능
-```xml
-<!-- @Compnent @Service @Repository 애노테이션을 스캐닝 해서 빈으로 등록 해줌 -->
-<context:component-scan base-package="me.freelife"/>
-```
-
-- BookRepository
-```java
-@Repository
-public class BookRepository {
-}
-```
-
-- BookService
-```java
-@Service
-public class BookService {
-
-    @Autowired
-    BookRepository bookRepository;
-
-    public void setBookRepository(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
-    }
-}
-```
-
-## java 설정 파일
-> 빈 설정 파일을 xml이 아닌 java로 설정하는 파일
-```java
-@Configuration
-public class ApplicationConfig {
-
-    @Bean
-    public BookRepository bookRepository() {
-        return new BookRepository();
-    }
-
-    @Bean
-    public BookService bookService() {
-        BookService bookService = new BookService();
-        bookService.setBookRepository(bookRepository());
-        return bookService;
-    }
-}
-```
-
-- BookRepository
-```java
-public class BookRepository {
-}
-```
-
-- BookService
-```java
-public class BookService {
-
-    BookRepository bookRepository;
-
-    public void setBookRepository(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
-    }
-}
-```
-
-- application
-```java
-public class Application {
-
-    public static void main(String[] args) {
-        //ApplicationConfig 를 빈 설정으로 사용하겠다는 설정
-        ApplicationContext context = new AnnotationConfigApplicationContext(ApplicationConfig.class);
-
-        // ApplicationContext context = new ClassPathXmlApplicationContext("application.xml");
-        String[] beanDefinitionNames = context.getBeanDefinitionNames();
-        System.out.println(Arrays.toString(beanDefinitionNames));
-        BookService bookService = (BookService) context.getBean("bookService");
-        System.out.println(bookService.bookRepository != null);
-    }
-
-}
-```
-
-### ComponentScan
-> Application.class 가 있는 곳에서 ComponentScan하여 빈으로 등록
-```java
-@Configuration
-@ComponentScan(basePackageClasses = Application.class)
-public class ApplicationConfig {
-
-}
-```
-
-## 현재의 방식
-> 스프링 부트에서 사용하는 방식 @ComponentScan과 다수의 설정이 포함되어 있음
-```java
-@SpringBootApplication
-public class Application {
-
-    public static void main(String[] args) {
-      SpringApplication.run(Application.class, args);
-    }
-
-}
-```
-
-## 스프링 IoC 컨테이너의 역할
-- 빈 인스턴스 생성
-- 의존 관계 설정
-- 빈 제공
-
-## AppcliationContext
-- ClassPathXmlApplicationContext (XML)
-- AnnotationConfigApplicationContext (Java)
-
-## 빈 설정
-- 빈 명세서
-- 빈에 대한 정의를 담고 있다
-  - 이름
-  - 클래스
-  - 스코프
-  - 생성자 아규먼트 (constructor)
-  - 프로퍼트 (setter)
-  - ..
-
-## 컴포넌트 스캔
-- 설정방법
-  - XML 설정에서는 context:component-scan
-  - 자바 설정에서 @ComponentScan
-- 특정 패키지 이하의 모든 클래스 중에 @Component 애노테이션을 사용한 클래스를 빈 으로 자동으로 등록 해 줌
+- Initialization
+- `@PostConstruct` 등의 어노태이션으로 Bean이 만들어진 이후에 해야할일을 정의 해주는것
+- InitializingBean을 implement 해서 afterPropertiesSet 메서드를 구현
