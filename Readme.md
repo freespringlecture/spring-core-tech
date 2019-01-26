@@ -1,49 +1,28 @@
-# IoC 컨테이너 6부: Environment 2부. 프로퍼티
-## property
-- 다양한 방법으로 정의할 수 있는 설정값
-- Environment의 역할은 프로퍼티 소스 설정 및 프로퍼티 값 가져오기
+# IoC 컨테이너 7부: MessageSource
+> 국제화(i18n) 기능을 제공하는 인터페이스
+ApplicationContext 에서 상속 받은 인터페이스
 
-### 우선순위
-> StandardServletEnvironment의 우선순위
-- ServletConfig 매개변수
-- ServletContext 매개변수
-- JNDI (java:comp/env/)
-- JVM 시스템 프로퍼티 (-Dkey="value")
-- JVM 시스템 환경변수 (운영체제 환경변수)
-
-- VM option에 주는 법
-```
--Dapp.name=spring5
-```
-
-- properties 파일로 설정하는법
-1. resources 에 app.properties 파일 생성
-```
-app.about=spring
-```
-2. @Configuration or @SpringBootApplication 설정 파일이 있는 곳에 설정
+- MessageSource 직접설정 예시
+> ReloadableResourdeBundleMessageSource 로 메세지 변경 시 변경된 메세지를 반영
 ```java
-@PorpertySource("classpath:/app.properties")
-```
-3. Property 값 가져오기
-```java
-@Component
-public class AppRunner implements ApplicationRunner {
-
-    @Autowired
-    ApplicationContext ctx;
-
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        Environment environment = ctx.getEnvironment();
-        System.out.println(environment.getProperty("app.name"));
-        System.out.println(environment.getProperty("app.about"));
-    }
+@Bean
+public MessageSource messageSource() {
+    var messageSource = new ReloadableResourceBundleMessageSource();
+    messageSource.setBasename("classpath:/messages");
+    messageSource.setDefaultEncoding("UTF-8");
+    messageSource.setCacheSeconds(3); //캐싱하는 시간을 최대 3초까지만 캐싱하고 다시 읽음
+    return messageSource;
 }
 ```
 
-### 스프링 부트에서 Property 가져오기
-```java
-@Value("${app.name}")
-String appName;
+## 스프링부트
+> 스프링 부트를 사용한다면 별다른 설정 필요없이 아래와 같이 messages.properties 사용할 수 있음
+> 원래 빈으로 각각 등록시켜줘야 하지만 스프링 부트를 쓰면 자동으로 `ResourceBundleMessageSource` 가 빈으로 등록되어있음
+- messages.properties
+```
+greeting=hello, {0}
+```
+- messages_ko_KR.properties
+```
+greeting=안녕, {0}
 ```
