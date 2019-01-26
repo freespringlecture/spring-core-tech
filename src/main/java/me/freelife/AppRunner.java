@@ -7,29 +7,42 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
+import java.awt.print.Pageable;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 @Component
 public class AppRunner implements ApplicationRunner {
 
+    /**
+     * LocalValidatorFactoryBean이 빈으로 자동등록 되므로
+     * 의존성을 주입해서 바로 사용가능
+     */
     @Autowired
-    ApplicationContext resourceLoader;
+    Validator validator;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        System.out.println(resourceLoader.getClass());
+        System.out.println(validator.getClass());
 
-        // 접두어로 classpath를 사용하였으므로 자동으로 ClassPathResource 타입으로 적용됨
-        // Resource resource = resourceLoader.getResource("classpath:test.txt");
-        // 접두어를 빼면 ServletContextResurce 타입으로 적용됨
-        // 내장 톰캣은 context path가 지정되어 있지 않으므로 리소스를 찾을 수 없음
-        Resource resource = resourceLoader.getResource("test.txt");
-        System.out.println(resource.getClass());
+        Event event = new Event();
+        event.setLimit(-1);
+        event.setEmail("aaa2");
+        // EventValidator eventValidator = new EventValidator();
+        Errors errors = new BeanPropertyBindingResult(event, "event");
 
-        System.out.println(resource.exists());
-        System.out.println(resource.getDescription());
-        System.out.println(Files.readString(Path.of(resource.getURI())));
+        // eventValidator.validate(event, errors);
+        validator.validate(event, errors);
+        System.out.println(errors.hasErrors());
+        errors.getAllErrors().forEach(e -> {
+            System.out.println("===== error code =====");
+            Arrays.stream(e.getCodes()).forEach(System.out::println);
+            System.out.println(e.getDefaultMessage());
+        });
     }
 }
