@@ -1,58 +1,110 @@
-# 스프링 프레임워크 핵심 기술
+# IoC(Inversion of Control) 컨테이너
+> 서비스가 사용할 의존객체를 직접 만들어서 사용 하는 것이 아니라
+> 어떤 장치(생성자등)을 통해서 주입을 받아서 사용하는 방법
 
-> 스프링 프레임워크(이하 스프링) 5.1 버전이 출시 되었습니다. 버전이 올라갈 수록 스프링은 다양한 프로그래밍 기법과 기능을 제공하지만 스프링의 핵심 기술은 크게 변하지 않았습니다
+## 스프링 IoC 컨테이너를 사용하는 이유
+> 여러 개발자들이 스프링 커뮤니티에서 논의해서 만들어낸
+> 여러가지 디펜던시 인잭션 방법과 베스트 프랙티스들의 노하우가 쌓여있는 프레임워크이기 때문
+> 이 컨테이너 안에 있는 객체들을 빈(Bean)들이라고 함
+> IoC기능을 제공하는 빈들을 담고 있기 때문에 컨테이너라고 함
+> 컨테이너로부터 빈들을 가져와서 사용할 수 있음
+> 싱글톤으로 객체를 만들어 관리하고 싶을 때도 IoC컨테이너를 사용
 
-> 즉, IoC 컨테이너, AOP 그리고 몇몇 핵심 API는 스프링을 탄탄하게 지탱하는 디딤돌과 같습니다
-> 따라서 스프링 핵심 기술을 이해한다면, 스프링이 제공하는 JDBC, 테스트, MVC 관련 기능 뿐 아니라, 스프링 부트와 스프링 데이터 JPA와 같은 여러 다른 스프링 프로젝트도 빠르고 정확히 이해할 수 있습니다
+## 핵심 IoC 컨테이너
+- BeanFactory
 
-> 구체적으로 이번 강좌에서는 ​스프링 IoC​(Inversion of Control) 컨테이너와 빈 그리고 ​스프링 AOP​(Aspect Oriented Programming)에 대해 자세히 학습합니다
-> 또한 스프링이 제공하는 여러 기능의 기반이 되는 Resource, Validation, 데이터 바인딩과 같은 스프링의 여러 ​추상 API​와 Null 관련 유틸리티도 학습합니다
+## 빈(Bean)
+> 스프링 IoC 컨테이너가 관리하는 객체 
+> 의존성 주입을 하고 싶으면 Bean이 되어야됨
+- 장점
+  - 스프링 IoC컨테이너에 등록되는 빈들은 아무런 애노테이션을 붙이지 않았다면 기본적으로 싱글톤 Scope로 등록됨
+  - 메모리면에서도 효율적이고 런타임시에 성능 최적화에도 유리
+- 라이프사이클 인터페이스
+  > 라이프사이클 인터페이스를 사용하여 부가적인부
+   기능들을 만들어 낼 수 있음
+   ```java
+   @PostConstruct
+   public void postConstruct() {
+      System.out.println("=========================");
+      System.out.println("Hello");
+   }
+   ```
 
-> 이번 강좌는 IoC, AOP, PSA에 대해 들어는 봤지만, 실제 스프링으로 코딩을 해본적이 없는 분들 또는 핵심 기술에 대한 이해 없이 MVC로 웹 애플리케이션 개발만 해온 개발자 또는 학생을 대상으로 합니다 
-> 따라서 소개와 이해를 중심으로 설명하기 때문에 매우 깊이있게 다루진 않습니다 
-> 심화 학습을 하고 싶으신 분들께는 이번 강좌를 추천하지 않습니다
+## 의존성 주입
+BookRepository를 구현하지 않고서는 BookService만 테스트할 수 없는 상황  
+BookService에 코드가 있지만 BookRepository는 Null을 리턴 하므로  
+의존성을 가진 BookService로 단위테스트를 만들기 힘듬  
+더 힘든 상황은 BookRepository 직접 만들어서 사용하는 경우 의존성을 주입해줄 수 없는 상황이 테스트하기 더 힘든 상황임  
+```java
+//의존성 주입이 불가능한 객체 직접 생성한 경우
+private BookRepository bookRepository = new BookRepository();
 
-> 이번 강좌는 스프링 부트를 사용하며 스프링 핵심 기술을 학습합니다 따라서 스프링 부트 기반의 프로젝트를 사용하고 있는 개발자 또는 학생에게 유용한 스프링 강좌입니다
+//의존성 주입이 가능한 객체
+private BookRepository bookRepository;
 
-> 스프링 부트가 제공하는 여러 기능이 스프링의 핵심 기술과 어떻게 관련이 있는지 이해할 수 있습니다
+public BookService(BookRepository bookRepository) {
+   this.bookRepository = bookRepository;
+}
+```
+의존성을 주입해줄 수 있도록 되어있으므로 가짜 객체를 만들어서 의존성을 주입해서 테스트 할 수 있음
+```java
+@RunWith(SpringRunner.class)
+public class BookServiceTest {
 
-## 학습 목표
-- 스프링 프레임워크의 핵심 기술 IoC, AOP, PSA를 이해합니다
-- 스프링 프레임워크 IoC 컨테이너의 다양한 기능을 사용할 수 있습니다
-- 다양한 방법으로 빈을 정의하고 의존 관계를 주입할 수 있습니다
-- 스프링 AOP를 사용하여 Aspect를 모듈화 할 수 있습니다
-- 그밖에다양한스프링핵심기술을이해하고또활용할수있습니다
+    //가짜 객체 Mocking
+    @Mock
+    BookRepository bookRepository;
 
-## 학습 목차
--  IoC 컨테이너와 빈
--  리소스
--  Validation
--  데이터 바인딩
--  SpEL
--  스프링 AOP
--  Null-Safety
+    @Test
+    public void save() {
+        Book book = new Book();
 
-# 강좌및스프링소개
-- 참고: 스프링 프레임워크 레퍼런스
-https://docs.spring.io/spring/docs/current/spring-framework-reference/index.html
+        //save라는 메서드가 호출될 때 book이 들어오면 book을 리턴하라
+        when(bookRepository.save(book)).thenReturn(book);
+        BookService bookService = new BookService(bookRepository);
 
-## 스프링이란? 
-https://docs.spring.io/spring/docs/current/spring-framework-reference/overview.html#overview
-> 소규모 애플리케이션 또는 기업용 애플리케이션을 자바로 개발하는데 있어 유용하고 편리한 기능을 제공하는 프레임워크
-- 스프링 프레임워크 그 자체
-- 스프링 프레임워크 포함 모든 스프링 프로젝트 (스프링 부트, 스프링 데이터, 스프링시큐리티...)
-- 이 강좌에서 스프링은 “스프링 프레임워크"
+        Book result = bookService.save(book);
 
-## 스프링의 역사
-- 2003년 등장 (개발은 이미 그 이전부터 진행됐고)
-  - 등장시 Java EE 표준과 싸우는 것처럼 보였지만 실제론 JEE 스팩 구현 모음체(+알파)
-  - Servlet, WebSocket, Bean Validation, JPA, Dependency Injection, ...
-- 최근까지 주로 서블릿 기반 애플리케이션을 만들 때 사용해 옴
-- 스프링 5부터는 WebFlux 지원으로 서블릿 기반이 아닌 서버 애플리케이션도 개발할 수 있게 됨
+        assertThat(book.getCreated()).isNotNull();
+        assertThat(book.getBookStatus()).isEqualTo(BookStatus.DRAFT);
+        assertThat(result).isNotNull();
+    }
+}
+```
 
-## 디자인 철학
-- 모든 선택은 개발자의 몫 (예, 스프링이 특정 영속화 기술을 강요하지 않는다)
-- 다양한 관점을 지향한다 (유연성)
-- 하위 호환성을 지킨다 (노력)
-- API를 신중하게 설계 한다 (공들인다)
-- 높은 수준의 코드를 지향한다 (자랑)
+## 고전적인 bean 설정
+- `name`은 setter에서 가져 온것
+- `ref`는 다른 bean 의 id
+- id는 첫 글자는 소문자로쓰는 camel-case 컨벤션으로 작성
+
+## ApplicationContext
+> 실질적으로 가장 많이 사용하게 되는 Bean을 담고 있는 IoC컨테이너
+> BeanFactory 를 상속 받았음
+> BeanFactory 이외에 다양한 기능들을 더 추가로 가지고 있는 인터페이스
+- ApplicationEventPublisher(이벤트 발행 기능)
+- BeanFactory
+- EnvironmentCapable
+- HierarchicalBeanFactory
+- ListableBeanFactory
+- ResourceLoader(리소스 로딩 기능)
+- ResourcePatternResolver
+- MessageSource(메시지 소스 처리 기능(i18n 메시지 다국화))
+
+## Annotation
+> 스프링 2.5부터 가능한 사용방법 어노테이션 기반의 설정
+@Component - 빈설정 어노테이션
+@Service - @Component를 확장받은 서비스 어노테이션
+@Repository - @Component를 확장받은 레포지토리 어노테이션
+@Autowired - 빈 의존성 주입 받음
+@Inject - 빈 의존성 주입 받음
+@Configuration - 빈 설정 파일 어노테이션
+
+### @ComponentScan
+- basePackages
+  - 문자열로 패키지 명을 입력해야됨
+- basePackageClasses
+  - 지정된 클래스가 위치한곳 부터 Component Scanning를 해라
+  - 모든 클래스에 붙어있는 Annotation들을 찾아서 Bean으로 등록해라
+
+### @SpringBootApplication
+> 스프링 부트에서 위의 설정사항을 모두 적용해놓은 어노테이션
