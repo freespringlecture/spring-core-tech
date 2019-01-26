@@ -1,110 +1,193 @@
-# IoC(Inversion of Control) 컨테이너
-> 서비스가 사용할 의존객체를 직접 만들어서 사용 하는 것이 아니라
-> 어떤 장치(생성자등)을 통해서 주입을 받아서 사용하는 방법
+# IoC 컨테이너 2부: ApplicationContext와 다양한 빈 설정 방법
+> 빈 설정 -> 스프링 IoC 컨테이너
 
-## 스프링 IoC 컨테이너를 사용하는 이유
-> 여러 개발자들이 스프링 커뮤니티에서 논의해서 만들어낸
-> 여러가지 디펜던시 인잭션 방법과 베스트 프랙티스들의 노하우가 쌓여있는 프레임워크이기 때문
-> 이 컨테이너 안에 있는 객체들을 빈(Bean)들이라고 함
-> IoC기능을 제공하는 빈들을 담고 있기 때문에 컨테이너라고 함
-> 컨테이너로부터 빈들을 가져와서 사용할 수 있음
-> 싱글톤으로 객체를 만들어 관리하고 싶을 때도 IoC컨테이너를 사용
+## 고전적인 Application 설정
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd" >
 
-## 핵심 IoC 컨테이너
-- BeanFactory
+    <bean id="bookService" class="me.freelife.BookService"> <!-- bookService 빈 등록 -->
+        <!-- bookRepository 프로퍼티에 bookRepository 빈을 레퍼런스로 주입  -->
+        <!-- bookRepository name은 setter에서 가지고 온 것 -->
+        <!-- ref는 레퍼런스로 다른 빈을 참조한다는 뜻 -->
+        <!-- ref에는 setter 에 들어갈 수 있는 다른 bean의 id가 와야됨 -->
+        <property name="bookRepository" ref="bookRepository"/>
+    </bean>
 
-## 빈(Bean)
-> 스프링 IoC 컨테이너가 관리하는 객체 
-> 의존성 주입을 하고 싶으면 Bean이 되어야됨
-- 장점
-  - 스프링 IoC컨테이너에 등록되는 빈들은 아무런 애노테이션을 붙이지 않았다면 기본적으로 싱글톤 Scope로 등록됨
-  - 메모리면에서도 효율적이고 런타임시에 성능 최적화에도 유리
-- 라이프사이클 인터페이스
-  > 라이프사이클 인터페이스를 사용하여 부가적인부
-   기능들을 만들어 낼 수 있음
-   ```java
-   @PostConstruct
-   public void postConstruct() {
-      System.out.println("=========================");
-      System.out.println("Hello");
-   }
-   ```
+    <bean id="bookRepository" class="me.freelife.BookRepository"/> <!-- bookRepository 빈 등록 -->
 
-## 의존성 주입
-BookRepository를 구현하지 않고서는 BookService만 테스트할 수 없는 상황  
-BookService에 코드가 있지만 BookRepository는 Null을 리턴 하므로  
-의존성을 가진 BookService로 단위테스트를 만들기 힘듬  
-더 힘든 상황은 BookRepository 직접 만들어서 사용하는 경우 의존성을 주입해줄 수 없는 상황이 테스트하기 더 힘든 상황임  
+</beans>
+```
+
+- BookRepository
 ```java
-//의존성 주입이 불가능한 객체 직접 생성한 경우
-private BookRepository bookRepository = new BookRepository();
-
-//의존성 주입이 가능한 객체
-private BookRepository bookRepository;
-
-public BookService(BookRepository bookRepository) {
-   this.bookRepository = bookRepository;
+public class BookRepository {
 }
 ```
-의존성을 주입해줄 수 있도록 되어있으므로 가짜 객체를 만들어서 의존성을 주입해서 테스트 할 수 있음
-```java
-@RunWith(SpringRunner.class)
-public class BookServiceTest {
 
-    //가짜 객체 Mocking
-    @Mock
+- BookService
+```java
+public class BookService {
+
     BookRepository bookRepository;
 
-    @Test
-    public void save() {
-        Book book = new Book();
-
-        //save라는 메서드가 호출될 때 book이 들어오면 book을 리턴하라
-        when(bookRepository.save(book)).thenReturn(book);
-        BookService bookService = new BookService(bookRepository);
-
-        Book result = bookService.save(book);
-
-        assertThat(book.getCreated()).isNotNull();
-        assertThat(book.getBookStatus()).isEqualTo(BookStatus.DRAFT);
-        assertThat(result).isNotNull();
+    public void setBookRepository(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
     }
 }
 ```
 
-## 고전적인 bean 설정
-- `name`은 setter에서 가져 온것
-- `ref`는 다른 bean 의 id
-- id는 첫 글자는 소문자로쓰는 camel-case 컨벤션으로 작성
+- application
+```java
+public class Application {
 
-## ApplicationContext
-> 실질적으로 가장 많이 사용하게 되는 Bean을 담고 있는 IoC컨테이너
-> BeanFactory 를 상속 받았음
-> BeanFactory 이외에 다양한 기능들을 더 추가로 가지고 있는 인터페이스
-- ApplicationEventPublisher(이벤트 발행 기능)
-- BeanFactory
-- EnvironmentCapable
-- HierarchicalBeanFactory
-- ListableBeanFactory
-- ResourceLoader(리소스 로딩 기능)
-- ResourcePatternResolver
-- MessageSource(메시지 소스 처리 기능(i18n 메시지 다국화))
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("application.xml");
+        String[] beanDefinitionNames = context.getBeanDefinitionNames();
+        System.out.println(Arrays.toString(beanDefinitionNames));
+        BookService bookService = (BookService) context.getBean("bookService");
+        System.out.println(bookService.bookRepository != null);
+    }
 
-## Annotation
-> 스프링 2.5부터 가능한 사용방법 어노테이션 기반의 설정
-@Component - 빈설정 어노테이션
-@Service - @Component를 확장받은 서비스 어노테이션
-@Repository - @Component를 확장받은 레포지토리 어노테이션
-@Autowired - 빈 의존성 주입 받음
-@Inject - 빈 의존성 주입 받음
-@Configuration - 빈 설정 파일 어노테이션
+}
+```
 
-### @ComponentScan
-- basePackages
-  - 문자열로 패키지 명을 입력해야됨
-- basePackageClasses
-  - 지정된 클래스가 위치한곳 부터 Component Scanning를 해라
-  - 모든 클래스에 붙어있는 Annotation들을 찾아서 Bean으로 등록해라
+### 일일히 빈으로 등록하는 단점을 보완하기 위한 방법
+> 단점을 보완하기위해 패키지를 스캔해서 @Component @Service @Repository 처럼 
+> @Component를 확장한 애노테이션들을 스캐닝해서 빈으로 자동으로 등록해줌
+> 이렇게 등록된 빈은 @Autowired 나 @Inject를 통해 의존성을 주입하여 사용
+> 애너테이션 기반에 빈을 등록하고 설정하는 기능은 스프링 2.5부터 가능한기능
+```xml
+<!-- @Compnent @Service @Repository 애노테이션을 스캐닝 해서 빈으로 등록 해줌 -->
+<context:component-scan base-package="me.freelife"/>
+```
 
-### @SpringBootApplication
-> 스프링 부트에서 위의 설정사항을 모두 적용해놓은 어노테이션
+- BookRepository
+```java
+@Repository
+public class BookRepository {
+}
+```
+
+- BookService
+```java
+@Service
+public class BookService {
+
+    @Autowired
+    BookRepository bookRepository;
+
+    public void setBookRepository(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
+}
+```
+
+## java 설정 파일
+> 빈 설정 파일을 xml이 아닌 java로 설정하는 파일
+```java
+@Configuration
+public class ApplicationConfig {
+
+    @Bean
+    public BookRepository bookRepository() {
+        return new BookRepository();
+    }
+
+    @Bean
+    public BookService bookService() {
+        BookService bookService = new BookService();
+        bookService.setBookRepository(bookRepository());
+        return bookService;
+    }
+}
+```
+
+- BookRepository
+```java
+public class BookRepository {
+}
+```
+
+- BookService
+```java
+public class BookService {
+
+    BookRepository bookRepository;
+
+    public void setBookRepository(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
+}
+```
+
+- application
+```java
+public class Application {
+
+    public static void main(String[] args) {
+        //ApplicationConfig 를 빈 설정으로 사용하겠다는 설정
+        ApplicationContext context = new AnnotationConfigApplicationContext(ApplicationConfig.class);
+
+        // ApplicationContext context = new ClassPathXmlApplicationContext("application.xml");
+        String[] beanDefinitionNames = context.getBeanDefinitionNames();
+        System.out.println(Arrays.toString(beanDefinitionNames));
+        BookService bookService = (BookService) context.getBean("bookService");
+        System.out.println(bookService.bookRepository != null);
+    }
+
+}
+```
+
+### ComponentScan
+> Application.class 가 있는 곳에서 ComponentScan하여 빈으로 등록
+```java
+@Configuration
+@ComponentScan(basePackageClasses = Application.class)
+public class ApplicationConfig {
+
+}
+```
+
+## 현재의 방식
+> 스프링 부트에서 사용하는 방식 @ComponentScan과 다수의 설정이 포함되어 있음
+```java
+@SpringBootApplication
+public class Application {
+
+    public static void main(String[] args) {
+      SpringApplication.run(Application.class, args);
+    }
+
+}
+```
+
+## 스프링 IoC 컨테이너의 역할
+- 빈 인스턴스 생성
+- 의존 관계 설정
+- 빈 제공
+
+## AppcliationContext
+- ClassPathXmlApplicationContext (XML)
+- AnnotationConfigApplicationContext (Java)
+
+## 빈 설정
+- 빈 명세서
+- 빈에 대한 정의를 담고 있다
+  - 이름
+  - 클래스
+  - 스코프
+  - 생성자 아규먼트 (constructor)
+  - 프로퍼트 (setter)
+  - ..
+
+## 컴포넌트 스캔
+- 설정방법
+  - XML 설정에서는 context:component-scan
+  - 자바 설정에서 @ComponentScan
+- 특정 패키지 이하의 모든 클래스 중에 @Component 애노테이션을 사용한 클래스를 빈 으로 자동으로 등록 해 줌
