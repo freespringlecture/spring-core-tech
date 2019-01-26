@@ -1,71 +1,40 @@
-# Validation 추상화
-`org.springframework.validation.Validator`
-> 애플리케이션에서 사용하는 객체 검증용 인터페이스
+# 데이터 바인딩 추상화: PropertyEditor
+`org.springframework.validation.DataBinder`
+> 기술적인 관점: 프로퍼티 값을 타겟 객체에 설정하는 기능
+> 사용자 관점: 사용자 입력값을 애플리케이션 도메인 모델에 동적으로 변환해 넣어주는 기능
+> 해석하자면: 입력값은 대부분 “문자열”인데, 그 값을 객체가 가지고 있는 int, long, Boolean, Date 등 
+> 심지어 Event, Book 같은 도메인 타입으로도 변환해서 넣어주는 기능
 
-## 특징
-- 어떤한 계층과도 관계가 없다. => 모든 계층(웹, 서비스, 데이터)에서 사용해도 좋다.
-- 구현체 중 하나로, JSR-303(Bean Validation 1.0)과 JSR-349(Bean Validation 1.1)을 지원한다
-  - LocalValidatorFactoryBean​
-  https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/validation/beanvalidation/LocalValidatorFactoryBean.html
-- DataBinder에 들어가 바인딩 할 때 같이 사용되기도 한다.
-
-## 인터페이스
-> 구현해야 되는 두가지 메서드
-- boolean supports(Class clazz): 어떤 타입의 객체를 검증할 때 사용할 것인지 결정함
-- void validate(Object obj, Errors e): 실제 검증 로직을 이 안에서 구현
-  - 구현할 때 ValidationUtils 사용하며 편리 함.
-
-## 스프링 부트 2.0.5 이상 버전을 사용할 때
-- LocalValidatorFactoryBean ​​빈으로 자동 등록
-- JSR-380(Bean Validation 2.0.1) 구현체로 hibernate-validator 사용.
-- https://beanvalidation.org/
-  - 자바 표준 JEE 스펙
-  - NotEmpty, NotNull, NotBlank, Email, Size ... 애노테이션들로 빈의 데이터를 검증할 수 있는 기능
-
-## 에러코드
-만든 에러코드 외에 다른 에러코드들을 Validatior가 추가 해줌
-```bash
-notempty.event.title
-notempty.title
-notempty.java.lang.String
-notempty
-```
-
-## 애노테이션 검증
-> 아래와 같이 간단하게 애노테이션 검증이 가능하며
-> 복잡한 검증이 필요하다면 validate를 직접 구현하여 검증하면 됨
+## PropertyEditor
+- 스프링 3.0 이전까지 DataBinder가 변환 작업 사용하던 인터페이스
+- 쓰레드-세이프 하지 않으므로 빈으로 등록해서 사용하면 안됨
+  (상태 정보 저장 하고 있음, 따라서 싱글톤 빈으로 등록해서 쓰다가는...)
+- Object와 String 간의 변환만 할 수 있어, 사용 범위가 제한적 임 
+  (그래도 그런 경우가 대부분이기 때문에 잘 사용해 왔음 조심해서..)
 ```java
-public class Event {
-    Integer id;
+public class EventEditor extends PropertyEditorSupport {
 
-    @NotEmpty
-    String title;
+    @Override
+    public String getAsText() {
+        Event event = (Event) getValue();
+        return super.getAsText();
+    }
 
-    @NotNull @Min(0)
-    Integer limit;
-
-    @Email
-    String email;
+    @Override
+    public void setAsText(String text) throws IllegalArgumentException {
+        //문자열을 숫자로 변환함
+        setValue(new Event(Integer.parseInt(text)));
+    }
 }
 ```
 
-```bash
-===== error code =====
-Min.event.limit
-Min.limit
-Min.java.lang.Integer
-Min
-반드시 0보다 같거나 커야 합니다.
-===== error code =====
-NotEmpty.event.title
-NotEmpty.title
-NotEmpty.java.lang.String
-NotEmpty
-반드시 값이 존재하고 길이 혹은 크기가 0보다 커야 합니다.
-===== error code =====
-Email.event.email
-Email.email
-Email.java.lang.String
-Email
-이메일 주소가 유효하지 않습니다.
+## @InitBinder
+> 프로퍼티 에디터를 사용하기 위해 컨트롤러에서 사용할 바인더들을 등록하는 방법(전역적으로 등록하는 방법도 있음)
+> DataBinder의 구현체 중에 하나인 WebDataBinder에 PropertyEditor를 등록
+> 컨트롤러가 요청을 처리하기 전에 컨트롤러에서 정의한 DataBinder에 들어있는 PropertyEditor를 사용하게 됨
+```java
+@InitBinder
+public void init(WebDataBinder webDataBinder) {
+    webDataBinder.registerCustomEditor(Event.class, new EventEditor());
+}
 ```
