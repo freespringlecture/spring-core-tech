@@ -6,10 +6,10 @@
   애플리케이션에서 가장 흔한 문제에 대한 해결책을 제공하는 것이 목적
 
 ## 프록시 패턴
-- 왜?(기존 코드 변경없이) 접근 제어 또는 부가 기능 추가
-> Proxy패턴은 Interface(Subject)가 있고 Client는 Interface 타입으로 Proxy객체를 사용하게 됨
-> Proxy객체는 Target(Real Subject)객체를 참조하고 있음
-> Proxy객체가 Traget객체를 감싸서 실제 Client의 요청을 처리함
+- 왜?(기존 코드 변경없이) 접근 제어 또는 부가 기능 추가  
+> Proxy패턴은 Interface(Subject)가 있고 Client는 Interface 타입으로 Proxy객체를 사용하게 됨  
+> Proxy객체는 Target(Real Subject)객체를 참조하고 있음  
+> Proxy객체가 Traget객체를 감싸서 실제 Client의 요청을 처리함  
   
 <img src="img/06-03.png" style="width:450px"/>
   
@@ -34,9 +34,9 @@
   - CGlib은 클래스 기반 프록시도 지원
 - 스프링 IoC: 기존 빈을 대체하는 동적 프록시 빈을 만들어 등록 시켜준다
   > BeanPostProcessor: 어떠한 빈이 등록되면 그 빈을 가공할 수 있는 LifeCycle Interface 중 하나로 새로운 bean instance를
-  > 조작할 수 있는 기능을 제공
+  > 조작할 수 있는 기능을 제공  
   > 어떠한 빈이 등록이 되면 스프링이 AbstractAutoProxyCreator라는 BeanPostProcessor로 그 빈을 감싸는 
-  > Proxy빈을 만들어서 그 빈을 원래의 빈 대신에 등록을 해줌
-  > AbstractAutoProxyCreator: BeanPostProcessor의 구현체
+  > Proxy빈을 만들어서 그 빈을 원래의 빈 대신에 등록을 해줌  
+  > AbstractAutoProxyCreator: BeanPostProcessor의 구현체  
   - 클라이언트 코드 변경 없음
   - [AbstractAutoProxyCreator​](https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/aop/framework/autoproxy/AbstractAutoProxyCreator.html) implements ​[BeanPostProcessor](https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/config/BeanPostProcessor.html)
