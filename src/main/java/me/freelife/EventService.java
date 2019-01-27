@@ -1,10 +1,14 @@
 package me.freelife;
 
-public interface EventService {
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
 
-    void createEvent();
+@Service
+public class EventService {
 
-    void publishEvent();
-
-    void deleteEvent();
+    @NonNull
+    public String createEvent(@NonNull String name) {
+        return null;
+        // return "hello " + name;
+    }
 }
