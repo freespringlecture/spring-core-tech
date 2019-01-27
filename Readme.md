@@ -12,8 +12,8 @@ var app = new SpringApplication(Demospring51Application.class);
 app.run(args);
 ```
 4. Functional 방법
-> 구동 시 리플렉션이나 Proxy 같은 cg라이브러리 기법을 안쓰므로 성능상의 이점이 있음
-> 하지만 일일히 Bean들을 등록해주기에는 너무 불편함 @ComponentScan을 사용하는 것에 비해 너무 불편함
+> 구동 시 리플렉션이나 Proxy 같은 cg라이브러리 기법을 안쓰므로 성능상의 이점이 있음  
+> 하지만 일일히 Bean들을 등록해주기에는 너무 불편함 @ComponentScan을 사용하는 것에 비해 너무 불편함  
 - lambda 적용 전캔
 - 
 ```java 
@@ -60,9 +60,9 @@ app.run(args);
 - @Configuration
 
 ## @ComponentScan
-> @ComponentScan은 스캔할 패키지와 애노테이션에 대한 정보
-> 다른 Bean 들을 등록하기 전에 먼저 Bean을 등록 해줌
-> 실제 스캐닝 ConfigurationClassPostProcess 라는 BeanFactoryPostProcessor에 의해 처리됨
+> @ComponentScan은 스캔할 패키지와 애노테이션에 대한 정보  
+> 다른 Bean 들을 등록하기 전에 먼저 Bean을 등록 해줌  
+> 실제 스캐닝 ConfigurationClassPostProcess 라는 BeanFactoryPostProcessor에 의해 처리됨  
 
 - 주의 사항
   - @ComponentScan 이나 @SpringBootApplication 위치를 확인 위치에 따라 다른 패키지라면 Bean으로 등록되지않음
