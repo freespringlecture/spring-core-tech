@@ -30,7 +30,7 @@ publishEvent(ApplicationEvent event)
 - RequestHandledEvent: HTTP 요청을 처리했을 때 발생
 
 > 스프링 4.2 부터는 ApplicationEvent 클래스를 상속받지 않아도 이벤트로 사용할 수 있다
-- 4.2이전 상속을 받아 Event를 정의하는 로직
+### 4.2이전 상속을 받아 Event를 정의하는 로직
 ```java
 public class MyEvent extends ApplicationEvent {
 
@@ -56,10 +56,10 @@ public class MyEvent extends ApplicationEvent {
 
 }
 ```
-- 4.2 이후 Event 정의 로직
-> 스프링이 추구하는 스프링 프레임웍 코드가 전혀 들어가지 않은 POJO 기반의 프로그래밍의 비침투성 로직
-> 더 편하고 더 코드를 유지보수하기 쉬워짐
-> 이벤트는 빈이 아님
+### 4.2 이후 Event 정의 로직
+> 스프링이 추구하는 스프링 프레임웍 코드가 전혀 들어가지 않은 POJO 기반의 프로그래밍의 비침투성 로직  
+- 더 편하고 더 코드를 유지보수하기 쉬워짐  
+- 이벤트는 빈이 아님  
 ```java
 public class MyEvent {
 
@@ -101,7 +101,7 @@ public class AppRunner implements ApplicationRunner {
 
 ### ApplicationListener
 > Event를 받아서 처리하는 Handler 구현
-- 4.2 이전 로직
+#### 4.2 이전 로직
 ```java
 @Component
 public class MyEventHandler implements ApplicationListener<MyEvent> {
@@ -113,7 +113,7 @@ public class MyEventHandler implements ApplicationListener<MyEvent> {
 }
 ```
 
-- 4.2 이후 로직
+#### 4.2 이후 로직
 ```java
 @Component
 public class MyEventHandler {
@@ -156,7 +156,7 @@ public class Ioccontainer8Application {
 }
 ```
 
-- Handler 로직에 @Async 설정
+#### Handler 로직에 @Async 설정
 ```java
 @Component
 public class MyEventHandler {
