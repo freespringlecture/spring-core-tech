@@ -33,11 +33,11 @@ https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#
 
 ## 적용
 ### 1단계 Aspect 클래스 생성
-> PerfAspect 클래스 생성 하고 @Component @Aspect 지정 및 ProceedingJoinPoint 받는 메서드 작성 
+> PerfAspect 클래스 생성 하고 @Component @Aspect 지정 및 ProceedingJoinPoint 받는 메서드 작성  
 - ProceedingJoinPoint: JoinPoint가 적용될 메서드
-  > 메서드를 실행하는 것 자체가 Proceed
-  > 타겟에 해당하는 메서드를 요청하고 결과값을 던져줌
-  > 아무런 부가적인 기능이 일어나지 않은 상태
+  > 메서드를 실행하는 것 자체가 Proceed  
+  > 타겟에 해당하는 메서드를 요청하고 결과값을 던져줌  
+  > 아무런 부가적인 기능이 일어나지 않은 상태  
 ```java
 @Component
 @Aspect
@@ -51,8 +51,8 @@ public class PerfAspect {
 ```
 
 ### 2단계 부가기능 정의
-> 이 Advisor를 어떻게 적용할 것인 가
-> 클래스와 클라이언트 코드를 건드리지 않았지만 부가적인 기능을 중복 코드 없이 여러 클래스에 적용함
+> 이 Advisor를 어떻게 적용할 것인 가  
+> 클래스와 클라이언트 코드를 건드리지 않았지만 부가적인 기능을 중복 코드 없이 여러 클래스에 적용함  
 - Around
   > 메서드를 감싸는 형태로 적용이 됨  
   > 메서드 호출 자체를 감싸고 있기 때문에 메서드 호출 이전에도 무언가를 할 수 있고  
@@ -97,9 +97,9 @@ public @interface PerLogging {
 ```
 
 - annotation 기반으로 변경
-> 여러 곳에 흩어져 있는 기능에 각각 원하는 곳에 부가기능을 적용하고 싶다면
-> execution으로 적용하기 보다 annotation 기반으로 적용하는 것을 권장
-> 툴에서 지원을 못받는 경우 Annotation만 봐도 어느 정도 짐작이 되므로
+> 여러 곳에 흩어져 있는 기능에 각각 원하는 곳에 부가기능을 적용하고 싶다면  
+> execution으로 적용하기 보다 annotation 기반으로 적용하는 것을 권장  
+> 툴에서 지원을 못받는 경우 Annotation만 봐도 어느 정도 짐작이 되므로  
 ```java
 @Component
 @Aspect
