@@ -35,8 +35,8 @@ https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#
   - WebApplicationContext -> ServletContextResource
 
 - ApplicationContext의 타입에 상관없이 리소스 타입을 강제하려면 java.net.URL 접두어(+ classpath:)중 하나를 사용할 수 있다
-  > 명시적이므로 접두어를 사용하는 것을 권장
-  > 접두어를 사용하지 않으면 ServletContextResource로 Resolve 되므로 주의해야 함
-  > 루트는 `///`를 사용 `와일드 카드`나 `classpath*` 이렇게 사용할 수도 있음
+  > 명시적이므로 접두어를 사용하는 것을 권장  
+  > 접두어를 사용하지 않으면 ServletContextResource로 Resolve 되므로 주의해야 함  
+  > 루트는 `///`를 사용 `와일드 카드`나 `classpath*` 이렇게 사용할 수도 있음  
   - classpath:​​me/whiteship/config.xml -> ClassPathResource
   - file://​​/some/resource/path/config.xml -> FileSystemResource
