@@ -16,8 +16,8 @@ public MessageSource messageSource() {
 ```
 
 ## 스프링부트
-> 스프링 부트를 사용한다면 별다른 설정 필요없이 아래와 같이 messages.properties 사용할 수 있음
-> 원래 빈으로 각각 등록시켜줘야 하지만 스프링 부트를 쓰면 자동으로 `ResourceBundleMessageSource` 가 빈으로 등록되어있음
+> 스프링 부트를 사용한다면 별다른 설정 필요없이 아래와 같이 messages.properties 사용할 수 있음  
+> 원래 빈으로 각각 등록시켜줘야 하지만 스프링 부트를 쓰면 자동으로 `ResourceBundleMessageSource` 가 빈으로 등록되어있음  
 - messages.properties
 ```
 greeting=hello, {0}
