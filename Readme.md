@@ -16,17 +16,27 @@
 
 - 기존 코드를 건드리지 않고 성능을 측정해 보자. (프록시 패턴으로)
 
+## 단계별 적용
+- 원래 클래스나 클라이언트를 건드리지 않고 부가 기능을 추가 할 수 있었음
+> 중복 코드가 생기고, Proxy클래스를 만드는데 드는 비용과 수고, 다른 클래스에도 적용을 해야된다면? 모든 클래스에 Proxy클래스를 만들고
+> 중복 코드를 심어야 됨
+
 ## 문제점
 - 매번 프록시 클래스를 작성해야 하는가?
 - 여러 클래스 여러 메소드에 적용하려면?
 - 객체들 관계도 복잡하고...
 
 ## 그래서 등장한 것이 스프링 AOP
-- 스프링 IoC 컨테이너가 제공하는 기반 시설과 Dynamic 프록시를 사용하여 여러
-  복잡한 문제 해결
+- 스프링 IoC 컨테이너가 제공하는 기반 시설과 Dynamic 프록시를 사용하여 여러 복잡한 문제 해결
 - 동적 프록시: 동적으로 프록시 객체 생성하는 방법
+  > 어떤 객체를 감싸는 Proxy객체를 런타임에 만드는 방법
   - 자바가 제공하는 방법은 인터페이스 기반 프록시 생성
   - CGlib은 클래스 기반 프록시도 지원
 - 스프링 IoC: 기존 빈을 대체하는 동적 프록시 빈을 만들어 등록 시켜준다
+  > BeanPostProcessor: 어떠한 빈이 등록되면 그 빈을 가공할 수 있는 LifeCycle Interface 중 하나로 새로운 bean instance를
+  > 조작할 수 있는 기능을 제공
+  > 어떠한 빈이 등록이 되면 스프링이 AbstractAutoProxyCreator라는 BeanPostProcessor로 그 빈을 감싸는 
+  > Proxy빈을 만들어서 그 빈을 원래의 빈 대신에 등록을 해줌
+  > AbstractAutoProxyCreator: BeanPostProcessor의 구현체
   - 클라이언트 코드 변경 없음
   - [AbstractAutoProxyCreator​](https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/aop/framework/autoproxy/AbstractAutoProxyCreator.html) implements ​[BeanPostProcessor](https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/config/BeanPostProcessor.html)
