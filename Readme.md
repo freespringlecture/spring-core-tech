@@ -58,10 +58,10 @@ public class Application {
 ```
 
 ### 일일히 빈으로 등록하는 단점을 보완하기 위한 방법
-> 단점을 보완하기위해 패키지를 스캔해서 @Component @Service @Repository 처럼 
-> @Component를 확장한 애노테이션들을 스캐닝해서 빈으로 자동으로 등록해줌
-> 이렇게 등록된 빈은 @Autowired 나 @Inject를 통해 의존성을 주입하여 사용
-> 애너테이션 기반에 빈을 등록하고 설정하는 기능은 스프링 2.5부터 가능한기능
+> 단점을 보완하기위해 패키지를 스캔해서 @Component @Service @Repository 처럼  
+> @Component를 확장한 애노테이션들을 스캐닝해서 빈으로 자동으로 등록해줌  
+> 이렇게 등록된 빈은 @Autowired 나 @Inject를 통해 의존성을 주입하여 사용  
+> 애너테이션 기반에 빈을 등록하고 설정하는 기능은 스프링 2.5부터 가능한기능  
 ```xml
 <!-- @Compnent @Service @Repository 애노테이션을 스캐닝 해서 빈으로 등록 해줌 -->
 <context:component-scan base-package="me.freelife"/>
