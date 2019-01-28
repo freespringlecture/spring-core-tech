@@ -87,7 +87,7 @@ public class PerfAspect {
   - 애노테이션 기반으로 정의할 때 `RetentionPolicy`를 `CLASS`이상으로 주어야 함  
   - 클래스 파일까지 유지 하겠다는 의미  
   - `SOURCE`는 컴파일 후에 사라지고 `RUNTIME` 까지 유지할 필요는 없음  
-  - 기본 값이 `CLASS`이므로 그냥 기본값으로 두고 사용  
+  - 기본 값이 `CLASS`이므로 그냥 기본값으로 두고 사용  
 ```java
 @Documented //javaDoc 만들때 Documention이 되도록 지정
 @Target(ElementType.METHOD) //target은 Method
